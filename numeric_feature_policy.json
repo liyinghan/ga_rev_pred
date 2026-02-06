@@ -1,0 +1,101 @@
+{
+  "description": "Numeric feature policy for GA360 revenue prediction",
+  "action_reference": {
+    "drop": "Remove column (leakage)",
+    "log1p": "Transform: log1p(x)",
+    "log1p_cap": "Cap at cap_value (if set) or cap_quantile then log1p; use training cap for test",
+    "drop_raw": "Do not use raw value; use derived_features only"
+  },
+  "features": [
+    {
+      "field": "total_revenue",
+      "conclusion": "label",
+      "action": "log1p"
+    },
+    {
+      "field": "totals_totalTransactionRevenue",
+      "conclusion": "leakage",
+      "action": "drop"
+    },
+    {
+      "field": "totals_transactionRevenue",
+      "conclusion": "leakage",
+      "action": "drop"
+    },
+    {
+      "field": "totals_transactions",
+      "conclusion": "leakage",
+      "action": "drop"
+    },
+    {
+      "field": "total_product_viewed",
+      "conclusion": "heavy_tail_count",
+      "action": "log1p_cap",
+      "cap_quantile": 0.99,
+      "cap_value": 181.0
+    },
+    {
+      "field": "total_category_viewed",
+      "conclusion": "heavy_tail_count",
+      "action": "log1p"
+    },
+    {
+      "field": "totals_hits",
+      "conclusion": "behavior_intensity",
+      "action": "log1p"
+    },
+    {
+      "field": "totals_pageviews",
+      "conclusion": "behavior_intensity",
+      "action": "log1p"
+    },
+    {
+      "field": "totals_timeOnSite",
+      "conclusion": "heavy_tail_time",
+      "action": "log1p"
+    },
+    {
+      "field": "average_price_product_viewed",
+      "conclusion": "price",
+      "action": "log1p_cap",
+      "cap_quantile": 0.99,
+      "cap_value": 81.27365714285655
+    },
+    {
+      "field": "visitNumber",
+      "conclusion": "history_intensity",
+      "action": "log1p"
+    },
+    {
+      "field": "date",
+      "conclusion": "time_encoding",
+      "action": "drop_raw"
+    },
+    {
+      "field": "visitStartTime",
+      "conclusion": "timestamp",
+      "action": "drop_raw"
+    }
+  ],
+  "derived_features": {
+    "date": {
+      "from": "date",
+      "parse": "YYYYMMDD",
+      "emit": [
+        "date_dow",
+        "date_month",
+        "date_is_weekend"
+      ]
+    },
+    "visitStartTime": {
+      "from": "visitStartTime",
+      "parse": "unix_seconds",
+      "timezone": "UTC",
+      "emit": [
+        "vst_hour",
+        "vst_dow",
+        "vst_is_weekend"
+      ]
+    }
+  }
+}
